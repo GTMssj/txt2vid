@@ -26,14 +26,6 @@ def tts(path):
     with open('./tmp.srt', 'w', encoding='utf-8') as file:
         for line in lines:
             file.write(line)
-    '''
-    file_name = 'tmp.srt'  # 替换为你的文件名
-    with open(file_name, 'r') as file:  # 以读模式打开文件
-        data = file.read()  # 读取文件内容
-    data_no_spaces = data.replace(' ', '')
-    with open(file_name, 'w') as file:
-        file.write(data_no_spaces)
-    '''
 
 def makeVid(bgvid, index):
     def duration(path:str):
@@ -42,31 +34,34 @@ def makeVid(bgvid, index):
         return float(result.stdout)
 
     def mk_subvid(start:float, length:float):
-        subprocess.run(['ffmpeg', '-i', bgvid, '-ss', str(start), '-t', str(length), 'sub.mp4'])
+        subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', bgvid, '-ss', str(start), '-t', str(length), 'sub.mp4'])
 
-    def mk_titlevid():
-        with open("Files/config.json", "r") as json_file:
-            data = json.load(json_file)
-            fontSize = data["font_size"]
-            fontColor = data["font_color"]
-            strokeWidth = data["stroke_width"]
-            strokeColor = data["stroke_color"]
-
-        subtitle_filter = f"subtitles=tmp.srt:force_style='FontName=./Files/Font/font.ttf,FontSize={fontSize},PrimaryColour=&H{fontColor},OutlineColour=&H{strokeColor},Outline=2,MaxGlyphW=5'"
-        subprocess.run(['ffmpeg', '-i', 'sub.mp4', '-vf', subtitle_filter, 'title.mp4', '-y'])
+    def mk_titlevid(fontSize, fontColor, strokeWidth, strokeColor):
+        subtitle_filter = f"subtitles=tmp.srt:force_style='fontfile=/data/data/com.termux/files/home/code/python/txt2vid/Files/Font/font.ttf,FontSize={fontSize},PrimaryColour=&H{fontColor},OutlineColour=&H{strokeColor},Outline=2,MaxGlyphW=5'"
+        subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', 'sub.mp4', '-vf', subtitle_filter, 'title.mp4', '-y'])
 
     def mk_finvid(audio:str, name:str):
         output_file = f"./Files/Output/{name}.mp4"
-        subprocess.run(['ffmpeg', '-i', 'title.mp4', '-i', audio, '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', output_file])
+        subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', 'title.mp4', '-i', audio, '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', output_file])
 
 #   =================================   #
+
+    with open("Files/config.json", "r") as json_file:
+        data = json.load(json_file)
+        fontSize = data["font_size"]
+        fontColor = data["font_color"]
+        strokeWidth = data["stroke_width"]
+        strokeColor = data["stroke_color"]
 
     audio = "tmp.mp3"
     subtitle = "tmp.srt"
     audioDuration = duration(audio)
     startPoint = random.uniform(0, duration(bgvid) - audioDuration)
+    print("正在裁剪视频...")
     mk_subvid(startPoint, audioDuration)
-    mk_titlevid()
+    print("正在添加字幕...")
+    mk_titlevid(fontSize, fontColor, strokeWidth, strokeColor)
+    print("正在添加音频...")
     mk_finvid(audio, index)
     subprocess.run(['rm', './sub.mp4', 'title.mp4', 'tmp.srt', 'tmp.mp3'])
     
@@ -79,7 +74,8 @@ def main():
         os.system("clear")
         print("视频生成中: "+str(i+1)+"/"+str(int(len(file_list))), end="\n\n")
         time.sleep(1)
-        print(filename[:-4])
+        print(f"当前：{filename[:-4]}\n")
+        print("正在语音转文字...")
         tts("./Files/Data/"+filename)
         time.sleep(0.5)
         makeVid(bg_vid, filename[:-4])
