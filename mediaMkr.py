@@ -37,8 +37,8 @@ def makeVid(bgvid, index):
         subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', bgvid, '-ss', str(start), '-t', str(length), 'sub.mp4'])
 
     def mk_titlevid(fontSize, fontColor, strokeWidth, strokeColor):
-        subtitle_filter = f"subtitles=tmp.srt:force_style='fontfile=/data/data/com.termux/files/home/code/python/txt2vid/Files/Font/font.ttf,FontSize={fontSize},PrimaryColour=&H{fontColor},OutlineColour=&H{strokeColor},Outline=2,MaxGlyphW=5'"
-        subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', 'sub.mp4', '-vf', subtitle_filter, 'title.mp4', '-y'])
+        subtitle_filter = f"subtitles=tmp.srt:force_style='FontSize={fontSize},PrimaryColour=&H{fontColor},OutlineColour=&H{strokeColor},Outline=2,MaxGlyphW=5'"
+        subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', 'sub.mp4', '-vf', subtitle_filter, 'title.mp4'])
 
     def mk_finvid(audio:str, name:str):
         output_file = f"./Files/Output/{name}.mp4"
