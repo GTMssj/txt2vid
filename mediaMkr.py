@@ -34,15 +34,18 @@ def makeVid(bgvid, index):
         return float(result.stdout)
 
     def mk_subvid(start:float, length:float):
-        subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', bgvid, '-ss', str(start), '-t', str(length), 'sub.mp4'])
+        # subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', bgvid, '-ss', str(start), '-t', str(length), 'sub.mp4'])
+        subprocess.run(['ffmpeg', '-i', bgvid, '-ss', str(start), '-t', str(length), 'sub.mp4'])
 
     def mk_titlevid(fontSize, fontColor, strokeWidth, strokeColor):
-        subtitle_filter = f"subtitles=tmp.srt:fontsdir=/data/data/com.termux/files/home/code/python/txt2vid/Files/Font:force_style='FontName=PangMenZhengDao, FontSize={fontSize},PrimaryColour=&H{fontColor},OutlineColour=&H{strokeColor},Outline=2,MaxGlyphW=5'"
-        subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', 'sub.mp4', '-vf', subtitle_filter, 'title.mp4'])
+        subtitle_filter = f"subtitles=tmp.srt:fontsdir=./Files/Font:force_style='FontName=PangMenZhengDao, FontSize={fontSize},PrimaryColour=&H{fontColor},OutlineColour=&H{strokeColor},Outline=2,MaxGlyphW=5'"
+        # subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', 'sub.mp4', '-vf', subtitle_filter, 'title.mp4'])
+        subprocess.run(['ffmpeg', '-i', 'sub.mp4', '-vf', subtitle_filter, 'title.mp4'])
 
     def mk_finvid(audio:str, name:str):
         output_file = f"./Files/Output/{name}.mp4"
-        subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', 'title.mp4', '-i', audio, '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', output_file])
+        # subprocess.run(['ffmpeg', '-loglevel', 'quiet', '-i', 'title.mp4', '-i', audio, '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', output_file])
+        subprocess.run(['ffmpeg', '-i', 'title.mp4', '-i', audio, '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', output_file])
 
 #   =================================   #
 
@@ -54,7 +57,6 @@ def makeVid(bgvid, index):
         strokeColor = data["stroke_color"]
 
     audio = "tmp.mp3"
-    subtitle = "tmp.srt"
     audioDuration = duration(audio)
     startPoint = random.uniform(0, duration(bgvid) - audioDuration)
     print("正在裁剪视频...")
@@ -77,7 +79,7 @@ def main():
         print(f"当前：{filename[:-4]}\n")
         print("正在语音转文字...")
         tts("./Files/Data/"+filename)
-        time.sleep(0.5)
+        time.sleep(5)
         makeVid(bg_vid, filename[:-4])
 
 if __name__ == "__main__":
